@@ -10,7 +10,7 @@ use ambient_api::{
         rendering::components::color,
         transform::{
             components::{scale, translation},
-            concepts::Transformable,
+            concepts::{Transformable, TransformableOptional},
         },
     },
     prelude::*,
@@ -23,6 +23,7 @@ use packages::{
 
 #[main]
 pub fn main() {
+    // Spawn entities
     Entity::new()
         .with(quad(), ())
         .with(scale(), Vec3::ONE * 10.0)
@@ -30,6 +31,29 @@ pub fn main() {
         .with(plane_collider(), ())
         .spawn();
 
+    for _ in 0..30 {
+        Entity::new()
+            .with(cube(), ())
+            .with(cube_collider(), Vec3::ONE)
+            .with(translation(), (random::<Vec2>() * 20.0 - 10.0).extend(1.))
+            .spawn();
+    }
+
+    Entity::new()
+        .with_merge(Transformable {
+            local_to_world: Default::default(),
+            optional: TransformableOptional {
+                scale: Some(Vec3::ONE * 0.3),
+                ..Default::default()
+            },
+        })
+        .with(
+            model_from_url(),
+            packages::this::assets::url("AntiqueCamera.glb"),
+        )
+        .spawn();
+
+    // Queries
     spawn_query(is_player()).bind(move |players| {
         for (id, _) in players {
             entity::add_components(
@@ -45,14 +69,15 @@ pub fn main() {
         }
     });
 
-    for _ in 0..30 {
-        Entity::new()
-            .with(cube(), ())
-            .with(cube_collider(), Vec3::ONE)
-            .with(translation(), (random::<Vec2>() * 20.0 - 10.0).extend(1.))
-            .spawn();
-    }
+    query(bouncy_created()).each_frame(|entities| {
+        for (id, created) in entities {
+            if (game_time() - created).as_secs_f32() > 5.0 {
+                entity::despawn(id);
+            }
+        }
+    });
 
+    // Messages
     fixed_rate_tick(Duration::from_secs_f32(0.5), |_| {
         Entity::new()
             .with_merge(Sphere::suggested())
@@ -66,14 +91,6 @@ pub fn main() {
             .with(dynamic(), true)
             .with(bouncy_created(), game_time())
             .spawn();
-    });
-
-    query(bouncy_created()).each_frame(|entities| {
-        for (id, created) in entities {
-            if (game_time() - created).as_secs_f32() > 5.0 {
-                entity::despawn(id);
-            }
-        }
     });
 
     Paint::subscribe(|ctx, msg| {
