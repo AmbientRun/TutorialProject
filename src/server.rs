@@ -17,7 +17,8 @@ use ambient_api::{
 };
 use packages::{
     character_animation::components::basic_character_animations,
-    character_controller::components::use_character_controller, this::components::bouncy_created,
+    character_controller::components::use_character_controller,
+    this::{components::bouncy_created, messages::Paint},
 };
 
 #[main]
@@ -73,5 +74,22 @@ pub fn main() {
                 entity::despawn(id);
             }
         }
+    });
+
+    Paint::subscribe(|ctx, msg| {
+        if ctx.client_user_id().is_none() {
+            return;
+        }
+
+        let Some(hit) = physics::raycast_first(msg.ray_origin, msg.ray_dir) else {
+            return;
+        };
+
+        Entity::new()
+            .with(cube(), ())
+            .with(translation(), hit.position)
+            .with(scale(), Vec3::ONE * 0.1)
+            .with(color(), vec4(0., 1., 0., 1.))
+            .spawn();
     });
 }
