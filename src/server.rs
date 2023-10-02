@@ -1,42 +1,37 @@
 use ambient_api::{
     core::{
-        camera::concepts::{
-            PerspectiveInfiniteReverseCamera, PerspectiveInfiniteReverseCameraOptional,
-        },
-        primitives::components::{cube, quad},
-        transform::components::{lookat_target, rotation, scale, translation},
+        model::components::model_from_url, physics::components::plane_collider,
+        player::components::is_player, primitives::components::quad, rendering::components::color,
+        transform::components::scale,
     },
     prelude::*,
+};
+use packages::{
+    character_animation::components::basic_character_animations,
+    character_controller::components::use_character_controller,
 };
 
 #[main]
 pub fn main() {
-    PerspectiveInfiniteReverseCamera {
-        optional: PerspectiveInfiniteReverseCameraOptional {
-            aspect_ratio_from_window: Some(entity::resources()),
-            main_scene: Some(()),
-            translation: Some(Vec3::ONE * 5.),
-            ..default()
-        },
-        ..PerspectiveInfiniteReverseCamera::suggested()
-    }
-    .make()
-    .with(lookat_target(), vec3(0., 0., 0.))
-    .spawn();
-
     Entity::new()
-        .with(translation(), vec3(0., 0., 0.))
         .with(quad(), ())
+        .with(scale(), Vec3::ONE * 10.0)
+        .with(color(), vec4(1.0, 0.0, 0.0, 1.0))
+        .with(plane_collider(), ())
         .spawn();
 
-    for i in 1..=4 {
-        Entity::new()
-            .with(cube(), ())
-            .with(translation(), vec3(i as f32, 0., 1.))
-            .with(rotation(), Quat::from_rotation_z(i as f32))
-            .with(scale(), Vec3::ONE * i as f32 * 0.2)
-            .spawn();
-    }
-
-    println!("Hello, Ambient!");
+    spawn_query(is_player()).bind(move |players| {
+        for (id, _) in players {
+            entity::add_components(
+                id,
+                Entity::new()
+                    .with(use_character_controller(), ())
+                    .with(
+                        model_from_url(),
+                        packages::base_assets::assets::url("Y Bot.fbx"),
+                    )
+                    .with(basic_character_animations(), id),
+            );
+        }
+    });
 }
