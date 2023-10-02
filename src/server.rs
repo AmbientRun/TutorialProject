@@ -18,7 +18,10 @@ use ambient_api::{
 use packages::{
     character_animation::components::basic_character_animations,
     character_controller::components::use_character_controller,
-    this::{components::bouncy_created, messages::Paint},
+    this::{
+        components::bouncy_created,
+        messages::{Paint, Teleport},
+    },
 };
 
 #[main]
@@ -108,5 +111,15 @@ pub fn main() {
             .with(scale(), Vec3::ONE * 0.1)
             .with(color(), vec4(0., 1., 0., 1.))
             .spawn();
+    });
+
+    Teleport::subscribe(|ctx, _| {
+        let Some(player_id) = ctx.client_entity_id() else {
+            return;
+        };
+
+        entity::mutate_component(player_id, translation(), |t| {
+            *t += 10. * Vec3::Z;
+        });
     });
 }

@@ -1,7 +1,7 @@
 use ambient_api::{
     core::transform::components::translation, element::use_entity_component, prelude::*,
 };
-use packages::this::messages::Paint;
+use packages::this::messages::{Paint, Teleport};
 
 #[main]
 pub fn main() {
@@ -22,7 +22,12 @@ pub fn main() {
         }
     });
 
-    PlayerPosition.el().spawn_interactive();
+    FlowRow::el([PlayerTeleport.el(), PlayerPosition.el()]).spawn_interactive();
+}
+
+#[element_component]
+fn PlayerTeleport(_hooks: &mut Hooks) -> Element {
+    Button::new("Teleport", |_| Teleport.send_server_reliable()).el()
 }
 
 #[element_component]
