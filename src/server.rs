@@ -8,7 +8,7 @@ use ambient_api::{
 };
 use packages::{
     character_animation::components::basic_character_animations,
-    character_controller::components::use_character_controller,
+    character_controller::components::{camera_distance, use_character_controller},
 };
 
 #[main]
@@ -30,7 +30,8 @@ pub fn main() {
                         model_from_url(),
                         packages::base_assets::assets::url("Y Bot.fbx"),
                     )
-                    .with(basic_character_animations(), id),
+                    .with(basic_character_animations(), id)
+                    .with(camera_distance(), -1.0),
             );
         }
     });
