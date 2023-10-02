@@ -18,6 +18,7 @@ use ambient_api::{
 use packages::{
     character_animation::components::basic_character_animations,
     character_controller::components::use_character_controller,
+    package_manager,
     this::{
         components::bouncy_created,
         messages::{Paint, Teleport},
@@ -26,6 +27,13 @@ use packages::{
 
 #[main]
 pub fn main() {
+    // Set up mod manager
+    entity::add_component(
+        package_manager::entity(),
+        package_manager::components::mod_manager_for(),
+        packages::this::entity(),
+    );
+
     // Spawn entities
     Entity::new()
         .with(quad(), ())
