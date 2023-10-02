@@ -1,4 +1,6 @@
-use ambient_api::prelude::*;
+use ambient_api::{
+    core::transform::components::translation, element::use_entity_component, prelude::*,
+};
 use packages::this::messages::Paint;
 
 #[main]
@@ -19,4 +21,12 @@ pub fn main() {
             .send_server_unreliable();
         }
     });
+
+    PlayerPosition.el().spawn_interactive();
+}
+
+#[element_component]
+fn PlayerPosition(hooks: &mut Hooks) -> Element {
+    let pos = use_entity_component(hooks, player::get_local(), translation());
+    Text::el(format!("Player position: {}", pos.unwrap_or_default()))
 }
