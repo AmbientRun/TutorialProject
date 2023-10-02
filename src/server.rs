@@ -3,8 +3,8 @@ use ambient_api::{
         camera::concepts::{
             PerspectiveInfiniteReverseCamera, PerspectiveInfiniteReverseCameraOptional,
         },
-        primitives::components::quad,
-        transform::components::{lookat_target, translation},
+        primitives::components::{cube, quad},
+        transform::components::{lookat_target, rotation, scale, translation},
     },
     prelude::*,
 };
@@ -28,6 +28,15 @@ pub fn main() {
         .with(translation(), vec3(0., 0., 0.))
         .with(quad(), ())
         .spawn();
+
+    for i in 1..=4 {
+        Entity::new()
+            .with(cube(), ())
+            .with(translation(), vec3(i as f32, 0., 1.))
+            .with(rotation(), Quat::from_rotation_z(i as f32))
+            .with(scale(), Vec3::ONE * i as f32 * 0.2)
+            .spawn();
+    }
 
     println!("Hello, Ambient!");
 }
